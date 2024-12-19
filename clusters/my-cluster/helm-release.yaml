@@ -2,7 +2,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: my-helm-release
-  namespace: default # Replace with your desired namespace
+  namespace: redis # Replace with your desired namespace
 spec:
   releaseName: my-release
   chart:
