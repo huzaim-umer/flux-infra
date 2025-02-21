@@ -1,0 +1,73 @@
+# Default Values
+# https://github.com/jetstack/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
+# https://github.com/jetstack/cert-manager/tree/master/deploy/crds
+## Tolerations for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+
+certificateEmail: amoon@calrom.com
+
+# crds are installed globally before installing any infrastructre relases
+installCRDs: false
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 125Mi
+  limits:
+    cpu: 500m
+    memory: 500Mi
+tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: apps
+      effect: NoSchedule
+
+cainjector:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 125Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: apps
+      effect: NoSchedule
+
+startupapicheck:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 125Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: apps
+      effect: NoSchedule
+
+webhook:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 50Mi
+    limits:
+      cpu: 100m
+      memory: 150Mi
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: apps
+      effect: NoSchedule
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false
+
+networkPolicy:
+  enabled: true
