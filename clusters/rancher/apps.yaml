@@ -1,14 +1,19 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: cert-manager
+  name: apps
   namespace: flux-system
 spec:
   interval: 10m0s
   dependsOn:
-  - name: cert-manager-crds
+    - name: flagger-system
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infra/dev/cert-manager
+  path: ./apps/gitops
   prune: true
+  # healthChecks:
+  #   - apiVersion: helm.toolkit.fluxcd.io/v1beta1
+  #     kind: HelmRelease
+  #     name: fares-api
+  #     namespace: gitops

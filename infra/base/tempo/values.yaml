@@ -1,0 +1,145 @@
+# https://github.com/grafana/helm-charts/blob/main/charts/tempo-distributed/values.yaml
+# https://grafana.com/docs/tempo/latest/operations/architecture/
+
+# -- Overrides the chart's computed fullname
+fullnameOverride: tempo
+
+overrides:
+  defaults: {}
+  per_tenant_override_config: /runtime-config/overrides.yaml
+
+per_tenant_overrides:
+  "tenant1":
+    ingestion:
+      burst_size_bytes: 15728640         # 15MB
+      rate_limit_bytes: 10485760         # 10MB
+      max_traces_per_user: 10000
+    global:
+      max_bytes_per_trace: 2097152       # 2MB
+
+  "tenant2":
+    ingestion:
+      burst_size_bytes: 12582912         # 12MB
+      rate_limit_bytes: 8388608          # 8MB
+      max_traces_per_user: 8000
+    global:
+      max_bytes_per_trace: 1572864       # ~1.5MB
+
+ingester:
+  replicas: 2
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule
+        
+
+metricsGenerator:
+  enabled: true
+  replicas: 1
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+  # -- More information on configuration: https://grafana.com/docs/tempo/latest/configuration/#metrics-generator
+  config:
+    storage:
+      remote_write:
+        - url: "http://prometheus-aurora.monitoring:9090/api/v1/write"
+
+
+distributor:
+  replicas: 2
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+
+compactor:
+  replicas: 1
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+  config:
+    compaction:
+      # https://grafana.com/docs/tempo/latest/configuration/#compactor
+      # -- Duration to keep blocks
+      block_retention: 240h # 10 days
+
+
+querier:
+  # -- Number of replicas for the querier
+  replicas: 2
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+
+
+queryFrontend:
+  replicas: 2
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+
+
+multitenancyEnabled: true
+reportingEnabled: false
+
+traces:
+  jaeger:
+    grpc:
+      enabled: true
+    thriftBinary:
+      enabled: true
+    thriftCompact:
+      enabled: true
+    thriftHttp:
+      enabled: true
+  zipkin:
+    enabled: true
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true
+  opencensus:
+    enabled: true
+
+
+storage:
+  trace:
+    # -- The supported storage backends are gcs, s3 and azure, as specified in https://grafana.com/docs/tempo/latest/configuration/#storage
+    # Should be one of "gcs", "s3", "azure" or "local" (only supported in the monolithic mode)
+    backend: s3
+    block:
+      bloom_filter_false_positive: .05 # bloom filter false positive rate.  lower values create larger filters but fewer false positives
+      v2_index_downsample_bytes: 1000     # number of bytes per index record
+      v2_encoding: zstd                   # block encoding/compression.  options: none, gzip, lz4-64k, lz4-256k, lz4-1M, lz4, snappy, zstd, s2
+    s3:
+      bucket: tempo                                                   
+      endpoint: k8s-test-traces.frankfurt.local:9000                                    
+      access_key: minioadmin                                
+      secret_key: 1tCh9ulIsjt8yn             
+      insecure: true                                                   
+
+memcached:
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 
+
+memcachedExporter:
+  tolerations:
+    - key: aurora/nodetype
+      operator: Equal
+      value: monitoring
+      effect: NoSchedule 

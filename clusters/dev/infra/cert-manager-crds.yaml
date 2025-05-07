@@ -10,5 +10,5 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
-  path: ./infra/base/cert-manager-crds
+  path: ./infra/dev/cert-manager-crds
   prune: true
